@@ -29,7 +29,8 @@ public class Server {
 		pw = new PrintWriter(socket.getOutputStream(), true);
 		System.out.println("클라이언트에서 id,password를 전송합니다.");
 		// 클라이언트로부터 데이터를 읽어옴
-		if (br.readLine().equals("1")) {
+		String command = br.readLine();
+		if (command.equals("1")) {
 			pw.println("기존 회원의 로그인 입니다.");
 			String id = br.readLine();
 			String password = br.readLine();
@@ -51,7 +52,7 @@ public class Server {
 					}
 				}
 			}
-		} else if (br.readLine().equals("2")) { // 단어 입력을 받았을시 처리해야하는 부분
+		} else if (command.equals("2")) { // 단어 입력을 받았을시 처리해야하는 부분
 			pw.println("클라이언트에서 서버로 단어를 전송합니다");
 			pw.flush(); // 버퍼 비움
 			String word = br.readLine();

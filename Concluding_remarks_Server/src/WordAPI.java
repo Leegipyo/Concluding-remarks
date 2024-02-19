@@ -11,6 +11,10 @@ public class WordAPI {
 	public int getTotalValue(String word) {
 		try {
 			String key = "4F568F0B880583B7E82510AAFA533017";
+			Scanner scanner = new Scanner(System.in);
+			System.out.print("단어를 입력하세요: ");
+			scanner.close();
+
 			URL url = new URL("https://stdict.korean.go.kr/api/search.do?key=" + key + "&type_search=search&q=" + word
 					+ "&req_type=json");
 			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -29,9 +33,15 @@ public class WordAPI {
 			// "channel" 객체에서 "total" 값을 추출
 			int total = jsonObject.getJSONObject("channel").getInt("total");
 
-			return total > 0 ? 1 : -1; // total 값이 1 이상이면 1을 반환, 아니면 -1을 반환
+			if (total > 0) {
+				System.out.println("total 값이 1 이상입니다.");
+				return 1;
+			} else {
+				System.out.println("없는 단어입니다.");
+				return -1;
+			}
 		} catch (Exception e) {
-			System.out.println("-1반환");
+			e.printStackTrace();
 			return -1; // 오류 발생 시 -1을 반환
 		}
 	}
