@@ -51,9 +51,14 @@ public class Server {
 					}
 				}
 			}
+		} else if (br.readLine().equals("2")) { // 단어 입력을 받았을시 처리해야하는 부분
+			pw.println("클라이언트에서 서버로 단어를 전송합니다");
+			pw.flush(); // 버퍼 비움
+			String word = br.readLine();
+			System.out.println("클라우드에서 전송한 단어 : " + word);
+			WordAPI api = new WordAPI();
+			api.getTotalValue(word); // 1이 반환 되면 유효한단어 , -1이면 유효하지 않은 단어
+			pw.println("단어 유효성 검사 완료");
 		}
-		// 단어 입력을 받았을시 처리해야하는 부분
-
 	}
-
 }

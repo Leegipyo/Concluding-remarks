@@ -29,7 +29,7 @@ public class Client {
 						pw.println(login.getPassword()); // 로그인 클래스에서 비밀번호 가져온후 서버에 PassWord 전송
 						pw.flush(); // 버퍼 비우기
 						System.out.println(br.readLine());
-					
+
 					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -37,5 +37,22 @@ public class Client {
 			}
 		});
 
+		wordInput wordinput = new wordInput();
+		wordinput.setsendWordListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					pw.println(2); // 단어를 서버에 전송할경우 서버에 2를 전송
+					pw.flush();
+					if (br.readLine().equals("클라이언트에서 서버로 단어를 전송합니다")) {
+						pw.println(wordinput.getInsertword());
+						pw.flush();
+						br.readLine();
+					}
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 	}
 }
