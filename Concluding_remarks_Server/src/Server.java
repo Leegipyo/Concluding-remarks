@@ -59,6 +59,7 @@ public class Server {
 			WordAPI api = new WordAPI();
 			api.getTotalValue(word); // 1이 반환 되면 유효한단어 , -1이면 유효하지 않은 단어
 			pw.println("단어 유효성 검사 완료");
+			
 		}
 	}
 }
