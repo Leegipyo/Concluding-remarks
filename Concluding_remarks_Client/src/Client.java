@@ -36,6 +36,7 @@ public class Client {
 			}
 		});
 
+		// 단어 전송
 		wordInput wordinput = new wordInput();
 		wordinput.setsendWordListener(new ActionListener() {
 			@Override
