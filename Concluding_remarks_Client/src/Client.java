@@ -29,7 +29,6 @@ public class Client {
 						pw.println(login.getPassword()); // 로그인 클래스에서 비밀번호 가져온후 서버에 PassWord 전송
 						pw.flush(); // 버퍼 비우기
 						System.out.println(br.readLine());
-
 					}
 				} catch (IOException e1) {
 					e1.printStackTrace();

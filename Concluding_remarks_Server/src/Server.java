@@ -27,7 +27,6 @@ public class Server {
 
 		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		pw = new PrintWriter(socket.getOutputStream(), true);
-		System.out.println("클라이언트에서 id,password를 전송합니다.");
 		// 클라이언트로부터 데이터를 읽어옴
 		String command = br.readLine();
 		if (command.equals("1")) {
@@ -58,7 +57,7 @@ public class Server {
 			String word = br.readLine();
 			System.out.println("클라우드에서 전송한 단어 : " + word);
 			WordAPI api = new WordAPI();
-			api.getTotalValue(word); // 1이 반환 되면 유효한단어 , -1이면 유효하지 않은 단어
+			System.out.println("API 반환 값 확인: " + api.getTotalValue(word)); // 1이 반환 되면 유효한단어 , -1이면 유효하지 않은 단어
 			pw.println("단어 유효성 검사 완료");
 		}
 	}
