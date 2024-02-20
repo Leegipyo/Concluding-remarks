@@ -28,74 +28,79 @@ public class Server {
 		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		pw = new PrintWriter(socket.getOutputStream(), true);
 		// 클라이언트로부터 데이터를 읽어옴
-		String command = br.readLine();
-		if (command.equals("1")) {
-			pw.println("기존 회원의 로그인 입니다.");
-			String id = br.readLine();
-			String password = br.readLine();
-			// 받은 데이터 확인을 위한 출력문 작성
-			System.out.println("클라이언트에서 전송한 ID: " + id);
-			System.out.println("클라이언트에서 전송한 PassWord: " + password);
-			String sql = "select * from user where id = ? and password = ?";
-			try (Connection conn = DBConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-				stmt.setString(1, id);
-				stmt.setString(2, password);
-				try (ResultSet rs = stmt.executeQuery()) {
-					if (rs.next()) {
-						id.equals(rs.getString("id"));
-						password.equals(rs.getString("password"));
+		while (true) {
+			String command = br.readLine();
+			if (command.equals("1")) {
+				pw.println("기존 회원의 로그인 입니다.");
+				String id = br.readLine();
+				String password = br.readLine();
+				// 받은 데이터 확인을 위한 출력문 작성
+				System.out.println("클라이언트에서 전송한 ID: " + id);
+				System.out.println("클라이언트에서 전송한 PassWord: " + password);
+				String sql = "select * from user where id = ? and password = ?";
+				try (Connection conn = DBConnection.getConnection();
+						PreparedStatement stmt = conn.prepareStatement(sql)) {
+					stmt.setString(1, id);
+					stmt.setString(2, password);
+					try (ResultSet rs = stmt.executeQuery()) {
+						if (rs.next()) {
+							id.equals(rs.getString("id"));
+							password.equals(rs.getString("password"));
 
-						pw.println("로그인이 성공적으로 완료되었습니다."); // 로그인 성공시 서버에서 클라이언트로 전송
-					} else {
-						pw.println("해당 ID,비밀번호가 틀렸습니다."); // 로그인 실패시 서버에서 클라이언트로 전송
-					}
-				}
-			}
-		} else if (command.equals("2")) { // 단어 입력을 받았을시 처리해야하는 부분
-			pw.println("클라이언트에서 서버로 단어를 전송합니다");
-			pw.flush(); // 버퍼 비움
-			String word = br.readLine();
-			System.out.println("클라이언트에서 전송한 단어 : " + word);
-
-			String sql = "select * from word where word = ?";
-			try (Connection conn = DBConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-				stmt.setString(1, word);
-				try (ResultSet rs = stmt.executeQuery()) {
-					if (rs.next()) {
-						word.equals(rs.getString("word"));
-						int doubleCheckValue = rs.getInt("double_check");
-						// double_check 값이 0인 word일때는 "중복된 단어는 사용이 불가능 합니다"를 전송
-						if (doubleCheckValue == 0) {
-							pw.println("중복된 단어는 사용할 수 없습니다.");
-						} else if (doubleCheckValue == 1) {
-							// double_check 값이 1인 word일때는 word를 전송하고 double_check값을 0으로 변경
-							String updateSQL = "UPDATE word SET double_check = 0 WHERE word = ?"; // double_check값 0으로
-							try (PreparedStatement updateStmt = conn.prepareStatement(updateSQL)) {
-								updateStmt.setString(1, word);
-								updateStmt.executeUpdate();
-							}
-							pw.println(word); // DB에 존재하는 단어일시 단어를 서버 -> 클라이언트로 전송
-						}
-					} else {
-						WordAPI api = new WordAPI();
-						int returnValue = api.getTotalValue(word);
-						System.out.println("리턴값 확인 " + returnValue);
-						if (returnValue == -1) {
-							pw.println(word); // API에 존재하는 단어일시 단어를 서버 -> 클라이언트로 전송
-							String insertSQL = "insert into word (word,double_check) values (?,?)";
-							// API에서 유효하다고 판단된 단어를 insert하여 DB에 추가 하기
-							try (PreparedStatement insert = conn.prepareStatement(insertSQL)) {
-								insert.setString(1, word);
-								insert.setInt(2, 0);
-								insert.executeUpdate();
-							}
-						} else if (returnValue == 0) {
-							pw.println("유효하지 않는 단어 입니다. 다시 단어를 입력하여 주세요."); // 유효하지 않는 단어일 경우 서버 -> 클라이언트 전송
+							pw.println("로그인이 성공적으로 완료되었습니다."); // 로그인 성공시 서버에서 클라이언트로 전송
+						} else {
+							pw.println("해당 ID,비밀번호가 틀렸습니다."); // 로그인 실패시 서버에서 클라이언트로 전송
 						}
 					}
 				}
-			}
+			} else if (command.equals("2")) { // 단어 입력을 받았을시 처리해야하는 부분
+				pw.println("클라이언트에서 서버로 단어를 전송합니다");
+				pw.flush(); // 버퍼 비움
+				String word = br.readLine();
+				System.out.println("클라이언트에서 전송한 단어 : " + word);
+				// DB에 단어가 존재 하는지 확인.
+				String sql = "select * from word where word = ?";
+				try (Connection conn = DBConnection.getConnection();
+						PreparedStatement stmt = conn.prepareStatement(sql)) {
+					stmt.setString(1, word);
+					try (ResultSet rs = stmt.executeQuery()) {
+						if (rs.next()) {
+							word.equals(rs.getString("word"));
+							int doubleCheckValue = rs.getInt("double_check");
+							// double_check 값이 0인 word일때는 "중복된 단어는 사용이 불가능 합니다"를 전송
+							if (doubleCheckValue == 0) {
+								pw.println("중복된 단어는 사용할 수 없습니다.");
+							} else if (doubleCheckValue == 1) {
+								// double_check 값이 1인 word일때는 word를 전송하고 double_check값을 0으로 변경
+								String updateSQL = "UPDATE word SET double_check = 0 WHERE word = ?"; // double_check값
+																										// 0으로
+								try (PreparedStatement updateStmt = conn.prepareStatement(updateSQL)) {
+									updateStmt.setString(1, word);
+									updateStmt.executeUpdate();
+								}
+								pw.println(word); // DB에 존재하는 단어일시 단어를 서버 -> 클라이언트로 전송
 
+							}
+						} else { // DB에 존재 하지 않는 단어 일시 API확인.
+							WordAPI api = new WordAPI();
+							int returnValue = api.getTotalValue(word);
+							System.out.println("리턴값 확인 " + returnValue);
+							if (returnValue == -1) {
+								pw.println(word); // API에 존재하는 단어일시 단어를 서버 -> 클라이언트로 전송
+								String insertSQL = "insert into word (word,double_check) values (?,?)";
+								// API에서 유효하다고 판단된 단어를 insert하여 DB에 추가 하기
+								try (PreparedStatement insert = conn.prepareStatement(insertSQL)) {
+									insert.setString(1, word);
+									insert.setInt(2, 0);
+									insert.executeUpdate();
+								}
+							} else if (returnValue == 0) {
+								pw.println("유효하지 않는 단어 입니다. 다시 단어를 입력하여 주세요."); // 유효하지 않는 단어일 경우 서버 -> 클라이언트 전송
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }

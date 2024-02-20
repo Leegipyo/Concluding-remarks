@@ -15,8 +15,8 @@ public class WordAPI {
 					+ "&req_type=json");
 			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
-			// System.out.println(connection.getResponseCode()); // http에서 상태코드를 확인. 해당 웹에서는
-			// 유효하지 않은 단어도 200의 값을 반환 해주어서 사용이 불가능함.
+			// System.out.println(connection.getResponseCode()); // http에서 상태코드를 확인.
+			// 해당 웹에서는 유효하지 않은 단어도 200의 값을 반환 해주어서 사용이 불가능함.
 			System.out.println("-1일 경우 유효한단어, 0일 경우 유효하지 않은 단어 : " + connection.getContentLength()); // 유효한 단어면 -1 반환,
 			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			StringBuilder response = new StringBuilder();
@@ -32,13 +32,13 @@ public class WordAPI {
 				// "channel" 객체에서 "total" 값을 추출
 				int total = jsonObject.getJSONObject("channel").getInt("total");
 				if (total > 0) {
-					return -1; // total 값이 1 이상이면 1을 반환, 아니면 -1을 반환
+					return -1; // 유효한 단어일 경우 -1을 반환
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return 0; // 유요하지 않는 단어일시 null을 반환
+		return 0; // 유효하지 않는 단어일시 0을 반환
 	}
 
 }
