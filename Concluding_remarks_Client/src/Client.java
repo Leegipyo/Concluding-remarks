@@ -46,7 +46,7 @@ public class Client {
 					if (br.readLine().equals("클라이언트에서 서버로 단어를 전송합니다")) {
 						pw.println(wordinput.getInsertword());
 						pw.flush();
-						br.readLine();
+						System.out.println(br.readLine());
 					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
