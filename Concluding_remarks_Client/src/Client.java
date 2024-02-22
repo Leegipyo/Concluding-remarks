@@ -9,50 +9,89 @@ import java.net.UnknownHostException;
 
 public class Client {
 
-	public static void main(String[] args) throws IOException {
-		Socket socket = new Socket("192.168.0.99", 9999); // 접속할 서버의 아이피와 포트 번호 작성.
-		System.out.println("서버에 접속이 완료 되었습니다.");
-		BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		PrintWriter pw = new PrintWriter(socket.getOutputStream());
+	public static void main(String[] args) {
+		new Client().start();
+	}
 
-		Login login = new Login();
+	public synchronized void start() {
+		Socket socket = null;
+		try {
+			socket = new Socket("192.168.0.99", 9999);
+			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			PrintWriter pw = new PrintWriter(socket.getOutputStream());
 
-		// 로그인 버튼 액션 리스너 설정
-		login.setLoginListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					pw.println(1); // 기존회원의 로그인일 경우 서버에 1(int)를 전송.
-					pw.flush();
-					if (br.readLine().equals("기존 회원의 로그인 입니다.")) {
-						pw.println(login.getID()); // 로그인 클래스에서 ID 가져온후 서버에 ID를 전송
-						pw.println(login.getPassword()); // 로그인 클래스에서 비밀번호 가져온후 서버에 PassWord 전송
-						pw.flush(); // 버퍼 비우기
-						System.out.println(br.readLine());
-					}
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
-		});
+			System.out.println("서버에 연결됨.");
+			System.out.println("서버에 성공적으로 연결되었습니다.");
 
-		// 단어 전송
-		wordInput wordinput = new wordInput();
-		wordinput.setsendWordListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					pw.println(2); // 단어를 서버에 전송할경우 서버에 2를 전송
-					pw.flush();
-					if (br.readLine().equals("클라이언트에서 서버로 단어를 전송합니다")) {
-						pw.println(wordinput.getInsertword());
+			Login login = new Login();
+			login.setLoginListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					try {
+						pw.println(1);
 						pw.flush();
-						System.out.println(br.readLine());
+						if (br.readLine().equals("기존 회원의 로그인입니다.")) {
+							pw.println(login.getID());
+							pw.println(login.getPassword());
+							pw.flush();
+							System.out.println(br.readLine());
+							// 로그인 이 완료 되었을때 그다음 GUI 띄우기
+						}
+					} catch (IOException e1) {
+						e1.printStackTrace();
 					}
-				} catch (IOException e1) {
-					e1.printStackTrace();
 				}
-			}
-		});
+			});
+
+			// 이 스래드가 시작 하는 시점에 맞춰서 작성을 해야한다.
+			Thread wordTxRx = new Thread(new WordTxRx(pw, br));
+			wordTxRx.start();
+			wordTxRx.join(); // 스래드가 시작될때 까지 대기 하는 메소드
+			// 두 스레드가 모두 종료될 때까지 대기
+			wait();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("---- EXIT ----");
+	}
+
+	private static class WordTxRx implements Runnable {
+		private PrintWriter pw;
+		private BufferedReader br;
+
+		public WordTxRx(PrintWriter pw, BufferedReader br) {
+			this.pw = pw;
+			this.br = br;
+		}
+
+		@Override
+		public void run() {
+// 다른 런 메소드로 옮겨야함.
+			wordInput wordInput = new wordInput();
+			wordInput.setsendWordListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					pw.println(2);
+					pw.flush();
+					try {
+						if (br.readLine().equals("클라이언트에서 서버로 단어를 전송합니다")) {
+							pw.println(wordInput.getInsertword());
+							pw.flush();
+							System.out.println(br.readLine());
+						} else if (br.readLine().equals("끝말이 맞지 않습니다 다시 단어를 입력하세요.")) {
+							System.out.println("단어를 다시 입력하세요.");
+						} else if (br.readLine().equals("한글자 사용 불가능.")) {
+							System.out.println("한글자 단어는 사용이 불가능합니다.");
+						}
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+		}
 	}
 }
