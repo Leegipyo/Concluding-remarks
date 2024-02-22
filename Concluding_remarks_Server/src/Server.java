@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,97 +8,152 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server {
-	public static void main(String[] args) throws IOException, SQLException {
-		ServerSocket server = null;
-		Socket socket = null;
-		BufferedReader br = null;
-		PrintWriter pw = null;
+	private static List<ClientHandler> list;
 
-		server = new ServerSocket(9999); // 9999를 포트번호로 지정하여 서버열음.
-		System.out.println("서버를 오픈");
-		System.out.println("-----클라이언트 접속 대기-----");
+	public static void main(String[] args) throws IOException {
+		list = new ArrayList<>();
+		try (ServerSocket server = new ServerSocket(9999)) {
+			System.out.println("서버를 오픈");
+			System.out.println("-----클라이언트 접속 대기-----");
+			while (true) {
+				Socket socket = server.accept();
+				System.out.println("클라이언트번호 " + socket + "접속완료.");
 
-		socket = server.accept(); // 클라이언트에서 서버로 접속하는것을 대기
-		System.out.println("클라이언트에서 서버로 접속을 하였습니다.");
-		System.out.println("-------------------------------------");
+				ClientHandler clientHandler = new ClientHandler(socket);
+				Thread clientThread = new Thread(clientHandler);
+				list.add(clientHandler);
+				clientThread.start();
+			}
+		}
+	}
 
-		br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		pw = new PrintWriter(socket.getOutputStream(), true);
-		// 클라이언트로부터 데이터를 읽어옴
-		while (true) {
-			String command = br.readLine();
-			if (command.equals("1")) {
-				pw.println("기존 회원의 로그인 입니다.");
-				String id = br.readLine();
-				String password = br.readLine();
-				// 받은 데이터 확인을 위한 출력문 작성
-				System.out.println("클라이언트에서 전송한 ID: " + id);
-				System.out.println("클라이언트에서 전송한 PassWord: " + password);
-				String sql = "select * from user where id = ? and password = ?";
-				try (Connection conn = DBConnection.getConnection();
-						PreparedStatement stmt = conn.prepareStatement(sql)) {
-					stmt.setString(1, id);
-					stmt.setString(2, password);
-					try (ResultSet rs = stmt.executeQuery()) {
-						if (rs.next()) {
-							id.equals(rs.getString("id"));
-							password.equals(rs.getString("password"));
+	static class ClientHandler implements Runnable {
+		private Socket socket;
+		private BufferedReader br;
+		private PrintWriter pw;
 
-							pw.println("로그인이 성공적으로 완료되었습니다."); // 로그인 성공시 서버에서 클라이언트로 전송
-						} else {
-							pw.println("해당 ID,비밀번호가 틀렸습니다."); // 로그인 실패시 서버에서 클라이언트로 전송
-						}
+		public ClientHandler(Socket socket) {
+			this.socket = socket;
+			try {
+				br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				pw = new PrintWriter(socket.getOutputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void run() {
+			try {
+				if (br == null || pw == null) {
+					System.out.println("BufferedReader 또는 PrintWriter가 null입니다.");
+					return;
+				}
+
+				while (true) {
+					String command = br.readLine();
+					System.out.println("확인:" + command);
+					if (command.equals("1")) {
+						handleLogin();
+					} else if (command.equals("2")) {
+						handleWordInput();
 					}
 				}
-			} else if (command.equals("2")) { // 단어 입력을 받았을시 처리해야하는 부분
-				pw.println("클라이언트에서 서버로 단어를 전송합니다");
-				pw.flush(); // 버퍼 비움
-				String word = br.readLine();
-				System.out.println("클라이언트에서 전송한 단어 : " + word);
-				// DB에 단어가 존재 하는지 확인.
-				String sql = "select * from word where word = ?";
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		private void handleLogin() throws IOException, SQLException {
+			pw.println("기존 회원의 로그인입니다.");
+			pw.flush();
+			String id = br.readLine();
+			String password = br.readLine();
+
+			System.out.println("클라이언트에서 전송한 ID: " + id);
+			System.out.println("클라이언트에서 전송한 Password: " + password);
+
+			String sql = "SELECT * FROM user WHERE id = ? AND password = ?";
+			try (Connection conn = DBConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+				stmt.setString(1, id);
+				stmt.setString(2, password);
+				try (ResultSet rs = stmt.executeQuery()) {
+					if (rs.next()) {
+						pw.println("로그인이 성공적으로 완료되었습니다.");
+						pw.flush();
+					} else {
+						pw.println("해당 ID, 비밀번호가 틀렸습니다.");
+						pw.flush();
+					}
+				}
+			}
+		}
+
+		Character lastChar = ' '; // 시작단어를 공백으로 설정
+
+		private void handleWordInput() throws IOException, SQLException {
+			pw.println("클라이언트에서 서버로 단어를 전송합니다");
+			pw.flush();
+			String word = br.readLine();
+			System.out.println(socket + "클라이언트에서 전송한 단어: " + word);
+			if ((lastChar == word.charAt(0) || lastChar == ' ') && word.length() >= 2) { // 마지막 문자와 클라이언트에서 전송한 문자가 동일하면
+				System.out.println("끝말 매칭 완료됨.");
+				String sql = "SELECT * FROM word WHERE word = ?";
 				try (Connection conn = DBConnection.getConnection();
 						PreparedStatement stmt = conn.prepareStatement(sql)) {
 					stmt.setString(1, word);
 					try (ResultSet rs = stmt.executeQuery()) {
 						if (rs.next()) {
-							word.equals(rs.getString("word"));
 							int doubleCheckValue = rs.getInt("double_check");
-							// double_check 값이 0인 word일때는 "중복된 단어는 사용이 불가능 합니다"를 전송
 							if (doubleCheckValue == 0) {
 								pw.println("중복된 단어는 사용할 수 없습니다.");
+								pw.flush();
 							} else if (doubleCheckValue == 1) {
-								// double_check 값이 1인 word일때는 word를 전송하고 double_check값을 0으로 변경
-								String updateSQL = "UPDATE word SET double_check = 0 WHERE word = ?"; // double_check값
-																										// 0으로
+								String updateSQL = "UPDATE word SET double_check = 0 WHERE word = ?";
 								try (PreparedStatement updateStmt = conn.prepareStatement(updateSQL)) {
 									updateStmt.setString(1, word);
 									updateStmt.executeUpdate();
 								}
-								pw.println(word); // DB에 존재하는 단어일시 단어를 서버 -> 클라이언트로 전송
-
+								pw.println(word); // 유효한 단어 입력시 작성한 단어 다시 클라이언트로 전송
+								int lastIndex = word.length() - 1;
+								lastChar = word.charAt(lastIndex);
+								pw.flush();
 							}
-						} else { // DB에 존재 하지 않는 단어 일시 API확인.
+						} else {
 							WordAPI api = new WordAPI();
 							int returnValue = api.getTotalValue(word);
 							System.out.println("리턴값 확인 " + returnValue);
 							if (returnValue == -1) {
-								pw.println(word); // API에 존재하는 단어일시 단어를 서버 -> 클라이언트로 전송
-								String insertSQL = "insert into word (word,double_check) values (?,?)";
-								// API에서 유효하다고 판단된 단어를 insert하여 DB에 추가 하기
+								String insertSQL = "INSERT INTO word (word, double_check) VALUES (?, ?)";
 								try (PreparedStatement insert = conn.prepareStatement(insertSQL)) {
 									insert.setString(1, word);
 									insert.setInt(2, 0);
 									insert.executeUpdate();
+
+									pw.println(word);// 유효한 단어 입력시 작성한 단어 다시 클라이언트로 전송
+									int lastIndex = word.length() - 1;
+									lastChar = word.charAt(lastIndex);
+									pw.flush();
 								}
 							} else if (returnValue == 0) {
-								pw.println("유효하지 않는 단어 입니다. 다시 단어를 입력하여 주세요."); // 유효하지 않는 단어일 경우 서버 -> 클라이언트 전송
+								pw.println("유효하지 않는 단어입니다. 다시 입력하세요.");
+								pw.flush();
 							}
 						}
 					}
 				}
+			} else if (2 < word.length()) {
+				pw.println("한글자 사용 불가능.");
+			} else {
+				System.out.println("끝말매칭 실패");
+				pw.println("끝말이 맞지 않습니다 다시 단어를 입력하세요.");
+				pw.flush();
 			}
 		}
 	}
