@@ -1,5 +1,8 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,6 +17,15 @@ public class wordInput extends JFrame {
 		JPanel pnl = new JPanel();
 		insertword = new JTextField(10);
 		JButton sendWord = new JButton("단어 전송");
+
+//		insertword.addKeyListener(new KeyAdapter() {
+//			@Override
+//			public void keyPressed(KeyEvent e) {
+//				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+//					sendWord.doClick();
+//				}
+//			}
+//		});
 
 		sendWord.addActionListener(new ActionListener() {
 			@Override
