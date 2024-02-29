@@ -424,7 +424,7 @@ public class Server {
 		private void handleWordInput() throws IOException, SQLException {
 			String word = br.readLine();
 			System.out.println(socket + "클라이언트에서 전송한 단어: " + word);
-			if (!word.isEmpty() && word.length() > 1 && (singleLastChar == word.charAt(0) || singleLastChar == ' ')) {
+			if ((singleLastChar == word.charAt(0) || singleLastChar == ' ') && word.length() > 1) {
 				String sql = "SELECT * FROM word WHERE word = ?";
 				try (Connection conn = DBConnection.getConnection();
 						PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -493,7 +493,7 @@ public class Server {
 			List<String> lastCharStartWord = new ArrayList<>();
 			String word = br.readLine();
 			System.out.println(socket + "클라이언트에서 전송한 단어: " + word);
-			if (!word.isEmpty() && word.length() > 1 && (singleLastChar == word.charAt(0) || singleLastChar == ' ')) {
+			if ((singleLastChar == word.charAt(0) || singleLastChar == ' ') && word.length() > 1) {
 				System.out.println("끝말 매칭 완료됨.");
 				String sql = "SELECT * FROM word WHERE word = ?";
 				try (Connection conn = DBConnection.getConnection();

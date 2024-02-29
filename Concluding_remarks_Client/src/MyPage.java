@@ -15,7 +15,7 @@ public class MyPage extends JFrame {
 
 	public MyPage() {
 		setSize(600, 600);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		setVisible(false);
 		getContentPane().setLayout(null);
 		setTitle("마이페이지");

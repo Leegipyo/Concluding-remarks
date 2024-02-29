@@ -1,6 +1,8 @@
 import java.awt.color.CMMException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,13 +31,14 @@ public class Client {
 	SingleMode singleMode = new SingleMode(); // 싱글모드 창
 	private Thread wordTx;
 	private Thread wordRx;
+	private Socket socket;
 
 	public static void main(String[] args) {
 		new Client().start();
 	}
 
 	public synchronized void start() {
-		Socket socket = null;
+		socket = null;
 
 		try {
 			socket = new Socket("192.168.0.99", 9996);
@@ -100,6 +103,26 @@ public class Client {
 					findpassword.setVisible(true);
 				}
 			});
+			login.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
 //---------------------------------------------------------------------------------------------------
 			// 아이디 찾기 창에서 잃어버린 아이디 찾기 (DB연결하여 ID를 찾을수 있음)
 			findId.setFindIDListener(new ActionListener() {
@@ -130,6 +153,26 @@ public class Client {
 					login.setVisible(true);
 				}
 			});
+			findId.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
 // -----------------------------------------------------------------------------------------------------			
 			// 비밀번호 찾기 창에서 아이디,이메일을 입력하여 비밀번호 찾기(DB에 연결하여 비밀번호 찾음)
 			findpassword.setFindPassWordListener(new ActionListener() {
@@ -158,6 +201,26 @@ public class Client {
 				public void actionPerformed(ActionEvent e) {
 					findpassword.setVisible(false);
 					login.setVisible(true);
+				}
+			});
+			findpassword.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
 				}
 			});
 //-----------------------------------------------------------------------------------------------------------------
@@ -198,6 +261,26 @@ public class Client {
 				public void actionPerformed(ActionEvent e) {
 					joinMembership.setVisible(false);
 					login.setVisible(true);
+				}
+			});
+			joinMembership.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
 				}
 			});
 //---------------------------------------------------------------------------------------------------------------------------
@@ -272,6 +355,26 @@ public class Client {
 					login.setVisible(true);
 				}
 			});
+			mainView.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
 // ---------------------------------------------------------------------------------------------
 			// 게임 설명창에서 메인화면 으로 변경
 			gameRule.setGameRuleBackListener(new ActionListener() {
@@ -279,6 +382,26 @@ public class Client {
 				public void actionPerformed(ActionEvent e) {
 					gameRule.setVisible(false);
 					mainView.setVisible(true);
+				}
+			});
+			gameRule.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
 				}
 			});
 //-------------------------------------------------------------------------------------------------
@@ -321,6 +444,26 @@ public class Client {
 					mainView.setVisible(true);
 				}
 			});
+			modeChoice.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
 //-----------------------------------------------------------------------------------------------------
 			// 뒤로가기 버튼 클릭시 마이페이지에서 메인화면으로 전환
 			myPage.setExitMypage(new ActionListener() {
@@ -328,6 +471,26 @@ public class Client {
 				public void actionPerformed(ActionEvent e) {
 					myPage.setVisible(false);
 					mainView.setVisible(true);
+				}
+			});
+			myPage.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
 				}
 			});
 //------------------------------------------------------------------------------------------------------
@@ -372,9 +535,56 @@ public class Client {
 					}
 				}
 			});
-
-			// 추가로 기능 구현해야할것들 생각하기... 개임 종료 시점
+			singleMode.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
 //--------------------------------------------------------------------------------------------------------------------------
+			multiMode.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					pw.println("Bye Bye");
+					pw.flush();
+					wordTx.interrupt();
+					wordRx.interrupt();
+
+					try {
+						wordTx.join();
+						wordRx.join();
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+					try {
+						if (socket != null) {
+							socket.close();
+						}
+						if (br != null) {
+							br.close();
+						}
+						if (pw != null) {
+							pw.close();
+						}
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+				}
+			});
 			// 멀티에서 게임 종료 버튼 눌렀을때 모드선택으로 전환
 			multiMode.setExitMulti(new ActionListener() {// 게임의 라운드 종료시 DB의 double_check 값을 1로 초기화 시켜주는 작업도 필요함
 				@Override
