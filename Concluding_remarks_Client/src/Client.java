@@ -73,7 +73,7 @@ public class Client {
 		socket = null;
 
 		try {
-			socket = new Socket("192.168.0.98", 9994);
+			socket = new Socket("192.168.0.99", 9996);
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			pw = new PrintWriter(socket.getOutputStream());
 
@@ -167,8 +167,11 @@ public class Client {
 						if (br.readLine().equals("아이디를 찾습니다.")) {
 							pw.println(findId.getFindID_emil());
 							pw.flush();
-							System.out.println("해당 이메일로 찾은 아이디 : " + br.readLine());
-							// 아이디를 다이얼로그 창으로 띄워주고 다이얼로그창에 ID 스트링값 띄어 준다음 로그인창으로 이동
+							String idAlarm = br.readLine();
+							System.out.println("해당 이메일로 찾은 아이디 : " + idAlarm);
+							JOptionPane.showMessageDialog(findpassword, "해당 이메일로 찾은 아이디 : " + idAlarm + " 입니다.");
+							findId.setVisible(false);
+							login.setVisible(true);
 						} else {
 							System.out.println(br.readLine());
 						}
@@ -217,8 +220,12 @@ public class Client {
 							pw.println(findpassword.getFindPassWord_ID()); // 아아디
 							pw.println(findpassword.getFindPassWord_Email()); // 이메일
 							pw.flush();
-							System.out.println("찾은 비밀번호는 " + br.readLine() + " 입니다.");
+							String passwordAlarm = br.readLine();
+							System.out.println("찾은 비밀번호는 " + passwordAlarm + " 입니다.");
 							// 다이얼로그 창에 찾은 비밀번호 표시 필요함
+							JOptionPane.showMessageDialog(findpassword, "찾은 비밀번호는 " + passwordAlarm + " 입니다.");
+							findpassword.setVisible(false);
+							login.setVisible(true);
 						} else {
 							System.out.println(br.readLine());
 						}
@@ -272,15 +279,19 @@ public class Client {
 								pw.flush();
 
 								System.out.println(br.readLine());// 이문구가 뜨는 다이얼로그 만들기
+								JOptionPane.showMessageDialog(joinMembership, "회원 가입이 완료 되었습니다.");
 								joinMembership.setVisible(false);
 								login.setVisible(true);
 							} else {
 								// 다이얼로그로 비밀번호와 비밀번호 확인에 입력한 값이 동일하지 않다는 다이얼로그 출력하기
 								System.out.println("비밀번호, 비밀번호 확인이 다릅니다.");
+								JOptionPane.showMessageDialog(joinMembership, "비밀번호, 비밀번호 확인이 다릅니다.");
 							}
 						} else {
 							// DB에 ID가 PK값이 때문에 이미 있는 ID라는 값 받기 "이미 있는 아이디 입니다" 다이얼로그 출력
-							System.out.println(br.readLine());
+							String reciveServer = br.readLine();
+							System.out.println(reciveServer);
+							JOptionPane.showMessageDialog(joinMembership, reciveServer);
 						}
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -540,9 +551,7 @@ public class Client {
 					modeChoice.setVisible(true);
 				}
 			});
-			// 타이머가 0이 될 때의 액션 리스너 설정
 
-			// 단어 전송 버튼 눌렀을시 DB에서 끝말로 시작하는 단어를 랜덤으로 출력해줌
 			// DB에 없을시 사용자가 끝말을 다시 입력
 			singleMode.setSingleSendWord(new ActionListener() {
 				@Override
@@ -571,7 +580,7 @@ public class Client {
 							System.out.println(br.readLine());
 							singleMode.setSingleWarning_text("DB에 끝말로 시작하는 단어가 없습니다. 사용자가 끝말을 이어서 작성하여 주세요.");
 							singleMode.setSinShowWord(singleMode.getSendWord());
-
+							singleScore++;
 							singleMode.stopTimer();
 							singleMode.resetTimer();
 							singleMode.startTimer();
@@ -754,40 +763,35 @@ public class Client {
 							multiMode.setMultiShowWord(comment);
 							System.out.println(userID + " : " + comment);
 							// 멀티 게임 창에 입력한 단어 띄워주기
-
 							if (!multiMode.getWarning_text().equals("")) {
 								multiMode.setWarning_text("");
 							} // 올바른 단어 입력시 경고문구 초기화
 							if (userID.equals(list.get(0))) {
-								;
 								multiMode.btnSendButton.setEnabled(false);
-								multiMode.userWaitTimer();
 								multiMode.resetTimer();
-								multiMode.stopTimer();// 버튼 비활성화시 타이머 정지
+								multiMode.stopTimer();
+								multiMode.startTimer();// 버튼 활성화시 타이머 스타트
 							} else {
-
 								multiMode.btnSendButton.setEnabled(true);
 								multiMode.resetTimer();
 								multiMode.stopTimer();
 								multiMode.startTimer();// 버튼 활성화시 타이머 스타트
-
 							}
-
 						}
 					} else if (command.equals("2")) {
 						if (multiMode.getMulti_user1().equals("")) {
 							multiMode.setMulti_user1(comment);
-							System.out.println("1번 유저 ID 확인 : " + comment);
+							multiMode.gameStartbtn.setEnabled(false);
 						} else if (multiMode.getMulti_user1().equals(comment)) {
+							System.out.println(comment);
+						} else if (multiMode.getMulti_user2().equals("")) {
+							multiMode.setMulti_user2(comment);
 							multiMode.gameStartbtn.setEnabled(true);
-							System.out.println("2번 유저 ID 확인 : " + comment);
+							System.out.println("2번 유저 확인 : " + comment);
 						} else if (multiMode.getMulti_user2().equals(comment)) {
 							System.out.println(comment);
 						} else if (multiMode.getMulti_user3().equals("")) {
 							multiMode.setMulti_user3(comment);
-							System.out.println("3번놈" + comment);
-							multiMode.gameStartbtn.setEnabled(true);
-						} else if (!multiMode.getMulti_user1().equals("") && !multiMode.getMulti_user2().equals("")) {
 							multiMode.gameStartbtn.setEnabled(true);
 						}
 					} else if (command.equals("3")) {

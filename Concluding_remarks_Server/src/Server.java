@@ -359,13 +359,14 @@ public class Server {
 			String passWord = br.readLine();
 			String email = br.readLine();
 			System.out.println("확인 : " + id + passWord + email);
-			String insertSQL = "INSERT INTO user (id,password,email,score) VALUES (?, ?, ?, ?)";
+			String insertSQL = "INSERT INTO user (id,password,email,single_score,multi_winner_count) VALUES (?, ?, ?, ?,?)";
 			try (Connection conn = DBConnection.getConnection();
 					PreparedStatement stmt = conn.prepareStatement(insertSQL)) {
 				stmt.setString(1, id);
 				stmt.setString(2, passWord);
 				stmt.setString(3, email);
 				stmt.setInt(4, 0);
+				stmt.setInt(5, 0);
 				stmt.executeUpdate();
 				pw.println("회원가입이 완료되었습니다. 로그인창으로 돌아가서 로그인을 진행 해주세요.");
 				pw.flush();
