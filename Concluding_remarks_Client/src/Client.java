@@ -173,7 +173,9 @@ public class Client {
 							findId.setVisible(false);
 							login.setVisible(true);
 						} else {
-							System.out.println(br.readLine());
+							String reServer = br.readLine();
+							System.out.println(reServer);
+							JOptionPane.showMessageDialog(findId, reServer);
 						}
 					} catch (IOException e1) {
 						e1.printStackTrace();
@@ -227,7 +229,9 @@ public class Client {
 							findpassword.setVisible(false);
 							login.setVisible(true);
 						} else {
-							System.out.println(br.readLine());
+							String reServer = br.readLine();
+							System.out.println(reServer);
+							JOptionPane.showMessageDialog(findpassword, reServer);
 						}
 					} catch (IOException e1) {
 						e1.printStackTrace();
