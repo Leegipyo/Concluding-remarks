@@ -5,6 +5,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.ImageIcon;
+import java.awt.Color;
 
 public class FindPassWord extends JFrame {
 	private JTextField FindPassWord_ID;
@@ -13,6 +15,7 @@ public class FindPassWord extends JFrame {
 	private ActionListener btnINfindPWback;
 
 	public FindPassWord() {
+		getContentPane().setBackground(Color.LIGHT_GRAY);
 
 		setSize(600, 600);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -23,8 +26,12 @@ public class FindPassWord extends JFrame {
 		lbl비밀번호_찾기.setBounds(12, 10, 95, 15);
 		getContentPane().add(lbl비밀번호_찾기);
 
-		JButton btn비밀번호찾기_뒤로가기 = new JButton("뒤로가기");
-		btn비밀번호찾기_뒤로가기.setBounds(475, 528, 97, 23);
+		JButton btn비밀번호찾기_뒤로가기 = new JButton();
+		btn비밀번호찾기_뒤로가기.setBorderPainted(false);
+		btn비밀번호찾기_뒤로가기.setContentAreaFilled(false);
+		btn비밀번호찾기_뒤로가기.setOpaque(false);
+		btn비밀번호찾기_뒤로가기.setIcon(new ImageIcon(FindPassWord.class.getResource("/img/뒤로가기 버튼.png")));
+		btn비밀번호찾기_뒤로가기.setBounds(475, 528, 100, 30);
 		getContentPane().add(btn비밀번호찾기_뒤로가기);
 
 		btn비밀번호찾기_뒤로가기.addActionListener(new ActionListener() {
@@ -54,8 +61,12 @@ public class FindPassWord extends JFrame {
 		FindPassWord_Email.setBounds(195, 170, 267, 21);
 		getContentPane().add(FindPassWord_Email);
 
-		JButton btn비밀번호찾기_비밀번호찾기 = new JButton("비밀번호 찾기");
-		btn비밀번호찾기_비밀번호찾기.setBounds(406, 225, 116, 23);
+		JButton btn비밀번호찾기_비밀번호찾기 = new JButton();
+		btn비밀번호찾기_비밀번호찾기.setIcon(new ImageIcon(FindPassWord.class.getResource("/img/비밀번호 찾기 1.png")));
+		btn비밀번호찾기_비밀번호찾기.setBorderPainted(false);
+		btn비밀번호찾기_비밀번호찾기.setContentAreaFilled(false);
+		btn비밀번호찾기_비밀번호찾기.setOpaque(false);
+		btn비밀번호찾기_비밀번호찾기.setBounds(406, 225, 100, 30);
 		getContentPane().add(btn비밀번호찾기_비밀번호찾기);
 		btn비밀번호찾기_비밀번호찾기.addActionListener(new ActionListener() {
 			@Override

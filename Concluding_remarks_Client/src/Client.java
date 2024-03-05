@@ -1,3 +1,6 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.color.CMMException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,8 +16,11 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.Timer;
 
 public class Client {
 	public static List<String> list = new ArrayList<>();
@@ -28,22 +34,48 @@ public class Client {
 	ModeChoice modeChoice = new ModeChoice(); // 싱글, 멀티 모드 선택창
 	static MultiMode multiMode = new MultiMode(); // 멀티 게임 창
 	MyPage myPage = new MyPage();// 마이페이지 창
-	SingleMode singleMode = new SingleMode(); // 싱글모드 창
+	SingleMode singleMode = new SingleMode(this); // 싱글모드 창
 	private Thread wordTx;
 	private Thread wordRx;
 	private Socket socket;
+	public Timer timer;
+	int singleScore = 0;
+	int WinnerCount = 0;
+	private PrintWriter pw;
 
 	public static void main(String[] args) {
 		new Client().start();
 	}
 
+	public void timerFinished() {
+		pw.println(7);
+		pw.flush();
+		pw.println(list.get(0));
+		pw.println(singleScore);
+		pw.flush();
+		singleScore = 0;
+		// 여기서 게임 종료시 모드 선택 창으로 전환하는 액션 리스너를 호출할 수 있습니다.
+		// exitSingleMode.actionPerformed(e);
+	}
+
+	// -----------------------------------------김종희----------------------------------------------
+	public void multiTimerFinished() {
+		pw.println(12);
+		pw.flush();
+		pw.println(list.get(0));
+		pw.println(WinnerCount);
+		pw.flush();
+		WinnerCount = 1;
+	}
+
+	// -----------------------------------------김종희----------------------------------------------
 	public synchronized void start() {
 		socket = null;
 
 		try {
-			socket = new Socket("192.168.0.99", 9996);
+			socket = new Socket("192.168.0.98", 9994);
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			PrintWriter pw = new PrintWriter(socket.getOutputStream());
+			pw = new PrintWriter(socket.getOutputStream());
 
 			System.out.println("서버에 연결됨.");
 			System.out.println("서버에 성공적으로 연결되었습니다.");
@@ -494,16 +526,22 @@ public class Client {
 				}
 			});
 //------------------------------------------------------------------------------------------------------
-			// 게임 종료 버튼 누르면 모드선택 창으로 전환
-			singleMode.setExitSingleMode(new ActionListener() {// 게임의 라운드 종료시 DB의 double_check 값을 1로 초기화 시켜주는 작업도 필요함
+			// 게임 종료 시 모드 선택 창으로 전환하는 액션 리스너 설정
+			singleMode.setExitSingleMode(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					pw.println(7);
 					pw.flush();
+					pw.println(list.get(0));
+					pw.println(singleScore);
+					pw.flush();
+					singleScore = 0;
 					singleMode.setVisible(false);
 					modeChoice.setVisible(true);
 				}
 			});
+			// 타이머가 0이 될 때의 액션 리스너 설정
+
 			// 단어 전송 버튼 눌렀을시 DB에서 끝말로 시작하는 단어를 랜덤으로 출력해줌
 			// DB에 없을시 사용자가 끝말을 다시 입력
 			singleMode.setSingleSendWord(new ActionListener() {
@@ -517,24 +555,46 @@ public class Client {
 					try {
 						String command = br.readLine();
 						if (command.equals("중복된 단어는 사용할 수 없습니다.")) {
-							System.out.println("중복된 단어는 사용이 불가능합니다.");
+							// System.out.println("중복된 단어는 사용이 불가능합니다.");
+							singleMode.setSingleWarning_text("중복된 단어는 사용이 불가능합니다.");
 						} else if (command.equals("유효하지 않는 단어입니다. 다시 입력하세요.")) {
-							System.out.println("유효하지 않는 단어입니다. 다시 입력하세요.");
+							// System.out.println("유효하지 않는 단어입니다. 다시 입력하세요.");
+							singleMode.setSingleWarning_text("유효하지 않는 단어입니다. 다시 입력하세요.");
 						} else if (command.equals("한글자 사용 불가능.")) {
-							System.out.println("한글자 사용 불가능.");
+							// System.out.println("한글자 사용 불가능.");
+							singleMode.setSingleWarning_text("한글자 사용 불가능.");
 						} else if (command.equals("끝말이 맞지 않습니다 다시 단어를 입력하세요.")) {
-							System.out.println("끝말이 맞지 않습니다.");
+							// System.out.println("끝말이 맞지 않습니다.");
+							singleMode.setSingleWarning_text("끝말이 맞지 않습니다 다시 단어를 입력하세요.");
 						} else if (command.equals("DB에 끝말로 시작하는 단어가 없습니다. 사용자가 끝말을 이어서 작성하여 주세요.")) {
 							System.out.println(command);
 							System.out.println(br.readLine());
+							singleMode.setSingleWarning_text("DB에 끝말로 시작하는 단어가 없습니다. 사용자가 끝말을 이어서 작성하여 주세요.");
+							singleMode.setSinShowWord(singleMode.getSendWord());
+
+							singleMode.stopTimer();
+							singleMode.resetTimer();
+							singleMode.startTimer();
+							// 버튼에 타이머 관여 못하게 하고 따로 동작
 						} else if (command.length() < 6) {
 							System.out.println(command); // GUI에 출력하기
+							singleMode.setSinShowWord(command);
+							if (!singleMode.getSingleWarning_text().equals("")) {
+								singleMode.setSingleWarning_text("");
+							}
+							singleScore++;
+							singleMode.stopTimer();
+							singleMode.resetTimer();
+							singleMode.startTimer();
+							// 점수 라벨 만들고 , 업데이트
+							// 버튼에 타이머 관여 못하게 하고 따로 동작
 						}
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}
 				}
 			});
+
 			singleMode.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosing(WindowEvent e) {
@@ -609,6 +669,17 @@ public class Client {
 					multiMode.setVisible(false);
 					modeChoice.setVisible(true);
 					roomTitle.remove(roomName);
+					multiMode.gameStartbtn.setEnabled(true);
+				}
+			});
+			multiMode.setGameStart(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					pw.println(11);
+					pw.flush();
+					pw.println(roomTitle.get(0));
+					pw.flush();
+					multiMode.gameStartbtn.setEnabled(false);
 				}
 			});
 		} catch (UnknownHostException e) {
@@ -635,6 +706,7 @@ public class Client {
 					pw.println(99); //
 					pw.flush();
 					pw.println(multiMode.getMulti_UserInput());
+					pw.println(list.get(0));
 					pw.flush();
 				}
 			});
@@ -662,33 +734,66 @@ public class Client {
 					if (command.equals("1")) {
 						if (comment.equals("중복된 단어는 사용할 수 없습니다.")) {
 							System.out.println("중복된 단어는 사용이 불가능합니다.");
+							multiMode.setWarning_text(comment);// 경고문구라벨에 경고문구띄우기
 						} else if (comment.equals("유효하지 않는 단어입니다. 다시 입력하세요.")) {
 							System.out.println("유효하지 않는 단어입니다. 다시 입력하세요.");
+							multiMode.setWarning_text(comment);// 경고문구라벨에 경고문구띄우기
 						} else if (comment.equals("한글자 사용 불가능.")) {
 							System.out.println("한글자 사용 불가능.");
+							multiMode.setWarning_text(comment);// 경고문구라벨에 경고문구띄우기
 						} else if (comment.equals("끝말이 맞지 않습니다 다시 단어를 입력하세요.")) {
 							System.out.println("끝말이 맞지 않습니다.");
-						} else if (multiMode.getMulti_UserInput().equals(comment)) {
-							System.out.println(comment); // 유효한 단어 가 출력 하는 문장
+							multiMode.setWarning_text(comment);// 경고문구라벨에 경고문구띄우기
+						} else if (comment.equals("게임 시작")) {
+							System.out.println(comment); // "게임 시작" GUI에 나타내기
+							multiMode.btnSendButton.setEnabled(true);
+
+						} else {
+							String userID = br.readLine();
+							multiMode.setMultiShowID(userID);
+							multiMode.setMultiShowWord(comment);
+							System.out.println(userID + " : " + comment);
+							// 멀티 게임 창에 입력한 단어 띄워주기
+
+							if (!multiMode.getWarning_text().equals("")) {
+								multiMode.setWarning_text("");
+							} // 올바른 단어 입력시 경고문구 초기화
+							if (userID.equals(list.get(0))) {
+								;
+								multiMode.btnSendButton.setEnabled(false);
+								multiMode.userWaitTimer();
+								multiMode.resetTimer();
+								multiMode.stopTimer();// 버튼 비활성화시 타이머 정지
+							} else {
+
+								multiMode.btnSendButton.setEnabled(true);
+								multiMode.resetTimer();
+								multiMode.stopTimer();
+								multiMode.startTimer();// 버튼 활성화시 타이머 스타트
+
+							}
+
 						}
 					} else if (command.equals("2")) {
 						if (multiMode.getMulti_user1().equals("")) {
 							multiMode.setMulti_user1(comment);
 							System.out.println("1번 유저 ID 확인 : " + comment);
 						} else if (multiMode.getMulti_user1().equals(comment)) {
-							System.out.println(comment);
-						} else if (multiMode.getMulti_user2().equals("")) {
-							multiMode.setMulti_user2(comment);
+							multiMode.gameStartbtn.setEnabled(true);
 							System.out.println("2번 유저 ID 확인 : " + comment);
 						} else if (multiMode.getMulti_user2().equals(comment)) {
 							System.out.println(comment);
 						} else if (multiMode.getMulti_user3().equals("")) {
 							multiMode.setMulti_user3(comment);
+							System.out.println("3번놈" + comment);
+							multiMode.gameStartbtn.setEnabled(true);
+						} else if (!multiMode.getMulti_user1().equals("") && !multiMode.getMulti_user2().equals("")) {
+							multiMode.gameStartbtn.setEnabled(true);
 						}
 					} else if (command.equals("3")) {
-						multiMode.setMulti_user1(comment);
-						multiMode.setMulti_user2(comment);
-						multiMode.setMulti_user3(comment);
+						multiMode.setMulti_user1("");
+						multiMode.setMulti_user2("");
+						multiMode.setMulti_user3("");
 					}
 				}
 			} catch (IOException e1) {
@@ -697,8 +802,6 @@ public class Client {
 				e.printStackTrace();
 				Thread.currentThread().interrupt();
 			}
-
 		}
-
 	}
 }

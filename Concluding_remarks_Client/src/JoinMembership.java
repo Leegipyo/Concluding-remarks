@@ -9,6 +9,9 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.ImageIcon;
+import java.awt.Color;
+
 
 public class JoinMembership extends JFrame {
 	private JTextField joinMembership_ID;
@@ -18,8 +21,10 @@ public class JoinMembership extends JFrame {
 	private ActionListener btnJoinMembershipINBack;
 	private ActionListener btnJoinMembership;
 	private JTextField joinMembership_Email;
+	
 
 	public JoinMembership() {
+		getContentPane().setBackground(Color.LIGHT_GRAY);
 		setSize(600, 600);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setVisible(false);
@@ -35,15 +40,19 @@ public class JoinMembership extends JFrame {
 		getContentPane().add(lbl아이디입력);
 
 		JLabel lbl비밀번호_입력 = new JLabel("비밀번호 입력");
-		lbl비밀번호_입력.setBounds(113, 186, 99, 24);
+		lbl비밀번호_입력.setBounds(113, 188, 99, 24);
 		getContentPane().add(lbl비밀번호_입력);
 
 		JLabel lbl비밀번호_확인 = new JLabel("비밀번호 확인");
 		lbl비밀번호_확인.setBounds(113, 236, 99, 24);
 		getContentPane().add(lbl비밀번호_확인);
 
-		JButton btn뒤로가기 = new JButton("뒤로가기");
-		btn뒤로가기.setBounds(480, 433, 97, 23);
+		JButton btn뒤로가기 = new JButton();
+		btn뒤로가기.setBorderPainted(false);
+		btn뒤로가기.setContentAreaFilled(false);
+		btn뒤로가기.setOpaque(false);
+		btn뒤로가기.setIcon(new ImageIcon(JoinMembership.class.getResource("/img/뒤로가기 버튼.png")));
+		btn뒤로가기.setBounds(480, 433, 100, 30);
 		getContentPane().add(btn뒤로가기);
 
 		btn뒤로가기.addActionListener(new ActionListener() {
@@ -62,7 +71,7 @@ public class JoinMembership extends JFrame {
 
 		joinMembership_PassWord = new JTextField();
 		joinMembership_PassWord.setColumns(10);
-		joinMembership_PassWord.setBounds(221, 188, 273, 21);
+		joinMembership_PassWord.setBounds(221, 190, 273, 21);
 		getContentPane().add(joinMembership_PassWord);
 
 		joinMembership_PassWord_DoubleCheck = new JTextField();
@@ -70,7 +79,11 @@ public class JoinMembership extends JFrame {
 		joinMembership_PassWord_DoubleCheck.setBounds(221, 238, 273, 21);
 		getContentPane().add(joinMembership_PassWord_DoubleCheck);
 
-		JButton btn회원가입 = new JButton("회원가입");
+		JButton btn회원가입 = new JButton();
+		btn회원가입.setIcon(new ImageIcon(JoinMembership.class.getResource("/img/회원가입 버튼.png")));
+		btn회원가입.setBorderPainted(false);
+		btn회원가입.setContentAreaFilled(false);
+		btn회원가입.setOpaque(false);
 		btn회원가입.setBounds(464, 274, 97, 23);
 		getContentPane().add(btn회원가입);
 
@@ -129,4 +142,4 @@ public class JoinMembership extends JFrame {
 		return joinMembership_Email.getText();
 	}
 
-};
+}
