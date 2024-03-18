@@ -3,12 +3,13 @@
 📅 진행 기간 <br/>
 - 2024.02.16 ~ 2024.03.01 <br/>
 
-💻 개발환경
-- 사용언어 : JAVA, SQL
-- 프로젝트 도구 : Eclipse, MySQL
-- 협업 툴 : GitHub
+💻 개발환경<br>
 
-📌 목적
+<img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=OpenJDK&logoColor=white"><img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"><img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"><br>
+🛠️Tool🛠️<br>
+<img src="https://img.shields.io/badge/eclipse-2C2255?style=for-the-badge&logo=eclipseide&logoColor=white">
+
+🎯 목적
 - 혼자서 즐기는 게임이 아닌 다수의 유저와 함께 즐길수 있는 간단한 끝말잇기 게임
 
 📝 학습목표
@@ -23,6 +24,10 @@
 - DB, HTTP API를 이용하여 클라이언트에서 전송하는 단어 유효성 확인
 - 싱글, 멀티 2가지 모드 제공
 - 멀티모드에서 다수의 클라이언트에게 동일한 정보 제공
+
+⭐ 주요 기능
+- 여러 사람이 참여하여 진행할 수 있는 끝말잇기 게임
+- 표준국어대사전 API를 이용하여 작성한 단어의 유효성 확인
 
 💥이슈사항 및 해결</br>
 - 유효하지 않은 단어를 입력을 하였을 때 에러가 발생함</br>
